@@ -20,15 +20,15 @@ MY_RETURN_0() {  return 0; }
 env_check () {
   exit_function=MY_RETURN_0;
   # If exit function is passed as $2 use it.
-  if [[ ! -z "$2" ]];then exit_function=$2 ;fi 
+  if [[ ! -z "$2" ]];then exit_function=$2 ;fi
   if [ $# -eq 0 ];then printf "No arguments supplied. \nUsage:\n env_check \"ENV_NAME\" [\"exit_function\"]\n" && $exit_function;fi
   param=$1;
   # The exclamation mark makes param to get the value of the variable with that name.
-  if [[ -z "${!param}" ]];then echo "$1 is undefined" && $exit_function; else echo "$1 = "${!param} ;fi 
+  if [[ -z "${!param}" ]];then echo "$1 is undefined" && $exit_function; else echo "$1 = "${!param} ;fi
 }
 check_oauth_scope() {
   # check to see if X-OAuth-Scopes has repo
-  curl --silent -i -H "Authorization: token $GIT_TOKEN" https://api.github.com/rate_limit | 
+  curl --silent -i -H "Authorization: token $GIT_TOKEN" https://api.github.com/rate_limit |
     grep "X-OAuth-Scopes:" | tr -d ":" | awk -v N=$2 '{print $2}'                                   # Pluck JSON value
 }
 
@@ -109,9 +109,9 @@ source $BUILD_TOOLS_DIR/setup_tensorflowenv.sh
 
 ### Check Bazel
 cd /workspace
-if command_exists bazel ; then 
-	echo "bazel command exists."; 
-else 
+if command_exists bazel ; then
+	echo "bazel command exists.";
+else
 	echo "bazel command doesnt exists"
     source $BUILD_TOOLS_DIR/build_bazel.sh
 fi
@@ -144,7 +144,6 @@ echo "FINAL_STR = "$FINAL_STR
 TENSORFLOW_BUILD_DIR_NAME=$OS_VERSION/${TF_GIT_BRANCH//r}/${FINAL_STR}
 
 
-
 #Dev Mode
 if [[ $TEST_LOOP = "y" ]]
 then
@@ -160,21 +159,24 @@ then
 fi
 
 
-
 ### git clone tf and test
 cd /workspace
 echo "####################################"
 echo "      clone git repo.....       	  "
 echo "####################################"
-#git clone --branch=r1.13 --depth=1 https://github.com/tensorflow/tensorflow.git .
-git clone --branch=$TF_GIT_BRANCH --depth=1 https://github.com/tensorflow/tensorflow.git .
-echo "Applying manylinux patch"
-patch -p1 < $BUILD_TOOLS_DIR/manylinux-$TF_GIT_BRANCH.patch
+#git clone --branch=r1.13 --depth=1 https://github.com/tensorflow/tensorflow.git
+git clone --branch=$TF_GIT_BRANCH --depth=1 https://github.com/tensorflow/tensorflow.git tmp_repo
+mv tmp_repo/* .
+rm -rf tmp_repo
+if [ -f $BUILD_TOOLS_DIR/manylinux-$TF_GIT_BRANCH.patch ]; then
+  echo "Applying manylinux patch"
+  patch -p1 < $BUILD_TOOLS_DIR/manylinux-$TF_GIT_BRANCH.patch
+fi
 ###########################
 ### TODO NO GPU support yet
 ###########################
 env_check TF_NEED_CUDA
-if [ $TF_NEED_CUDA = "1" ]; then 
+if [ $TF_NEED_CUDA = "1" ]; then
 	echo "####################################"
 	echo "      CUDA BUILD TODO.....       	  "
 	echo "####################################"
@@ -182,7 +184,7 @@ if [ $TF_NEED_CUDA = "1" ]; then
 	env_check LD_LIBRARY_PATH
 	ls -l /usr/local/cuda/
 	ls -l /usr/local/cuda/lib64/stubs/
-fi 
+fi
 
 #echo "${TF_GIT_BRANCH//r}"
 #Python Configuration Error: Invalid python library path: /usr/lib64/python3.6/site-packages
@@ -279,22 +281,22 @@ if ls -l  /workspace/build.log; then
 fi
 
 
-### enable HOST_ON_HTTP_SERVER only with deploymentConfig(i.e build-dc.json) and NOT with Jobs. 
+### enable HOST_ON_HTTP_SERVER only with deploymentConfig(i.e build-dc.json) and NOT with Jobs.
 if [[ $HOST_ON_HTTP_SERVER = "y" ]]
 then
 	echo "Starting httpserver to host the binary...\n"
     cd /workspace/
-	if [[ $PYTHON_VERSION = "2.7" ]] ; then 
-		python -m SimpleHTTPServer $PORT ; 
-	else python -m http.server $PORT ; 
+	if [[ $PYTHON_VERSION = "2.7" ]] ; then
+		python -m SimpleHTTPServer $PORT ;
+	else python -m http.server $PORT ;
 	fi
 fi
 
 echo "TF_ENABLE_TEST = "$TF_ENABLE_TEST
-if [ $TF_ENABLE_TEST = "1" ]; then 
+if [ $TF_ENABLE_TEST = "1" ]; then
 	echo "####################################"
 	echo "      test.....   		       	  "
 	echo "####################################"
 	eval "$CUSTOM_TEST" || echo "TEST FAILED"
-	#bazel test -c opt --local_resources 2048,.5,1.0 -- //tensorflow/... -//tensorflow/compiler/... -//tensorflow/contrib/lite/... 
+	#bazel test -c opt --local_resources 2048,.5,1.0 -- //tensorflow/... -//tensorflow/compiler/... -//tensorflow/contrib/lite/...
 fi
