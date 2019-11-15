@@ -65,7 +65,7 @@ ENV PYTHON_BIN_PATH=/usr/bin/python \
 	  TF_NEED_HDFS=0 \
 	  TF_ENABLE_XLA=0 \
 	  TF_NEED_OPENCL=0 \
-	  TF_NEED_CUDA=1 \
+	  TF_NEED_CUDA=0 \
   	TF_NEED_MPI=0 \
   	TF_NEED_GDR=0 \
   	TF_NEED_S3=0 \
@@ -82,7 +82,7 @@ ENV PYTHON_BIN_PATH=/usr/bin/python \
   	JAVA_HOME="/usr/lib/jvm/java-1.8.0-openjdk-1.8.0*"
 
 RUN yum install -y centos-release-scl \
-    && yum install -y vim gcc gcc-c++ clang glibc-devel make openssl-devel automake autoconf gpg devtoolset-$DEV_TOOLSET_VERSION \
+    && yum install -y vim gcc gcc-c++ clang glibc-devel c-ares c-ares-devel make openssl-devel automake autoconf gpg devtoolset-$DEV_TOOLSET_VERSION \
     && yum install -y rh-python36 rh-python35 python27 \
     && yum install -y which findutils x86info cpuid dmidecode procps perf \
     && yum install -y kernel-devel swig zip unzip gzip libtool binutils \
