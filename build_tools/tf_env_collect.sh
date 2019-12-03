@@ -138,7 +138,7 @@ ${python_bin_path} /tmp/check_tf.py 2>&1  >> ${OUTPUT_FILE}
   nvidia-smi 2>&1
   
   echo
-  cat /workspace/.tf_configure.bazelrc
+  cat /workspace/tensorflow/.tf_configure.bazelrc
   echo
   echo '== cuda libs  ==================================================='
   echo
