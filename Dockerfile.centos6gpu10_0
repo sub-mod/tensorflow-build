@@ -1,4 +1,4 @@
-FROM quay.io/harshad16/cuda-cento6-base
+FROM image-registry.openshift-image-registry.svc:5000/tekton-demo/python-36-rhel6:latest
 
 LABEL maintainer="Subin Modeel <smodeel@redhat.com>"
 USER root
