@@ -1,0 +1,93 @@
+---
+kind: Template
+apiVersion: v1
+metadata:
+  name: tf-s2i-build
+  annotations:
+    description: tf-s2i-build
+    tags: tf-s2i-build
+  labels:
+    app: tf-build
+
+objects:
+- kind: ImageStream
+  apiVersion: image.openshift.io/v1
+  metadata:
+    labels:
+      app: "tf-build"
+    name: "${APPLICATION_NAME}-s2i"
+  spec:
+    name: latest
+    lookupPolicy:
+      local: true
+
+- kind: BuildConfig
+  apiVersion: v1
+  metadata:
+    name: "${APPLICATION_NAME}"
+    labels:
+      app: "tf-build"
+  spec:
+    triggers:
+    - type: ConfigChange
+    - type: ImageChange
+    source:
+      type: Git
+      git:
+        uri: "${SOURCE_REPOSITORY}"
+    strategy:
+      type: Docker
+      dockerStrategy:
+        dockerfilePath: "${DOCKER_FILE_PATH}"
+        from:
+          kind: ImageStreamTag
+          name: "${BASE_IMAGE}:10.0-py-3.6"
+        env:
+        - name: PYTHON_VERSION
+          value: "${PYTHON_VERSION}"
+        - name: BAZEL_VERSION
+          value: "${BAZEL_VERSION}"
+        - name: DEV_TOOLSET_VERSION
+          value: "${DEV_TOOLSET_VERSION}"
+    output:
+      to:
+        kind: ImageStreamTag
+        name: "${APPLICATION_NAME}-s2i:latest"
+    resources:
+      limits:
+        cpu: '8'
+        memory: 10Gi
+      requests:
+        cpu: '6'
+        memory: 10Gi
+
+parameters:
+- name: APPLICATION_NAME
+  description: The name of the application.
+  value: tf-b26-py36-gpu-build
+  from: "[a-zA-Z0-9]{10}"
+  required: true
+- name: BASE_IMAGE
+  description: The base image required for the build.
+  value: 's2i-base-centos6-cuda'
+  required: true
+- name: SOURCE_REPOSITORY
+  description: Git repository for source.
+  value: https://github.com/harshad16/tensorflow-build.git
+  required: true
+- name: DOCKER_FILE_PATH
+  description: Dockerfile.
+  value: Dockerfile.centos6gpu
+  required: true
+- name: DEV_TOOLSET_VERSION
+  description: DEV_TOOLSET version 7, 8 .
+  value: '7'
+  required: true
+- name: PYTHON_VERSION
+  description: Python version 2.7, 3.6 .
+  value: '3.6'
+  required: true
+- name: BAZEL_VERSION
+  description: BAZEL_VERSION
+  value: 0.26.1
+  required: true
