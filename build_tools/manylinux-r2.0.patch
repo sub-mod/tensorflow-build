@@ -48,3 +48,20 @@ diff --git a/tensorflow/tools/pip_package/build_pip_package.sh b/tensorflow/tool
 
    rm -f ${TMPDIR}/tensorflow/libtensorflow_framework.so
    rm -f ${TMPDIR}/tensorflow/libtensorflow_framework.so.[0-9].*
+diff --git a/WORKSPACE b/WORKSPACE
+--- a/WORKSPACE
++++ b/WORKSPACE
+@@ -2,6 +2,13 @@ workspace(name = "org_tensorflow")
+
+ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
+
++http_archive(
++    name = "io_bazel_rules_docker",
++    sha256 = "dc97fccceacd4c6be14e800b2a00693d5e8d07f69ee187babfd04a80a9f8e250",
++    strip_prefix = "rules_docker-0.14.1",
++    urls = ["https://github.com/bazelbuild/rules_docker/releases/download/v0.14.1/rules_docker-v0.14.1.tar.gz"],
++)
++
+ http_archive(
+     name = "io_bazel_rules_closure",
+     sha256 = "5b00383d08dd71f28503736db0500b6fb4dda47489ff5fc6bed42557c07c6ba9",
